@@ -1,6 +1,5 @@
-
 {
-  "name": "bookmark-speed-extension",
+  "name": "jetmark-extension",
   "private": true,
   "version": "1.0.0",
   "type": "module",
