@@ -2,8 +2,8 @@
 {
   "manifest_version": 3,
   "name": "bookmark-speed",
-  "version": "1.0.2",
-  "description": "Lightning-fast bookmark search via keyboard.",
+  "version": "1.0.3",
+  "description": "Acceso ultra rápido a tus marcadores con el teclado.",
   "permissions": [
     "bookmarks",
     "tabs"
@@ -19,8 +19,5 @@
         "mac": "Command+Shift+K"
       }
     }
-  },
-  "content_security_policy": {
-    "extension_pages": "script-src 'self' 'unsafe-eval' https://esm.sh https://cdn.tailwindcss.com; object-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com"
   }
 }
