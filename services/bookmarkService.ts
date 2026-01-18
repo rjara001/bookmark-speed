@@ -1,7 +1,7 @@
 
 import { Bookmark } from '../types';
 
-// Declare chrome global for TypeScript as it's provided by the extension environment
+// Declare chrome global for TypeScript
 declare const chrome: any;
 
 /**
@@ -45,7 +45,7 @@ export const getBookmarks = async (): Promise<Bookmark[]> => {
   // Check if we are in a Chrome extension environment
   if (typeof chrome !== 'undefined' && chrome.bookmarks) {
     return new Promise((resolve) => {
-      chrome.bookmarks.getTree((tree) => {
+      chrome.bookmarks.getTree((tree: any[]) => {
         resolve(flattenBookmarks(tree));
       });
     });

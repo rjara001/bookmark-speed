@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import fs from 'fs';
 
-// Plugin sencillo para copiar el manifest.json a la carpeta dist automáticamente
+// Plugin para copiar el manifest.json a la carpeta dist
 const copyManifest = () => {
   return {
     name: 'copy-manifest',
@@ -12,6 +12,9 @@ const copyManifest = () => {
       const manifestPath = resolve(__dirname, 'manifest.json');
       const distPath = resolve(__dirname, 'dist/manifest.json');
       if (fs.existsSync(manifestPath)) {
+        if (!fs.existsSync(resolve(__dirname, 'dist'))) {
+          fs.mkdirSync(resolve(__dirname, 'dist'));
+        }
         fs.copyFileSync(manifestPath, distPath);
         console.log('\x1b[32m%s\x1b[0m', '✓ manifest.json copiado a dist/');
       }
@@ -21,6 +24,7 @@ const copyManifest = () => {
 
 export default defineConfig({
   plugins: [react(), copyManifest()],
+  base: './', // CRITICO: Genera rutas relativas (./assets/...) necesarias para extensiones
   build: {
     outDir: 'dist',
     emptyOutDir: true,
