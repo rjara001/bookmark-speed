@@ -4,33 +4,41 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import fs from 'fs';
 
-// Plugin para copiar el manifest.json a la carpeta dist
-const copyManifest = () => {
+// Plugin para copiar archivos necesarios a la carpeta dist
+const copyAssets = () => {
   return {
-    name: 'copy-manifest',
+    name: 'copy-assets',
     closeBundle() {
-      const manifestPath = resolve(__dirname, 'manifest.json');
-      const distPath = resolve(__dirname, 'dist/manifest.json');
-      if (fs.existsSync(manifestPath)) {
-        if (!fs.existsSync(resolve(__dirname, 'dist'))) {
-          fs.mkdirSync(resolve(__dirname, 'dist'));
-        }
-        fs.copyFileSync(manifestPath, distPath);
-        console.log('\x1b[32m%s\x1b[0m', '✓ manifest.json copiado a dist/');
+      const filesToCopy = ['manifest.json'];
+      const distPath = resolve(__dirname, 'dist');
+      
+      if (!fs.existsSync(distPath)) {
+        fs.mkdirSync(distPath);
       }
+
+      filesToCopy.forEach(file => {
+        const source = resolve(__dirname, file);
+        const dest = resolve(distPath, file);
+        if (fs.existsSync(source)) {
+          fs.copyFileSync(source, dest);
+        }
+      });
+      
+      console.log('\x1b[32m%s\x1b[0m', '✓ Archivos de extensión copiados a dist/');
     }
   };
 };
 
 export default defineConfig({
-  plugins: [react(), copyManifest()],
-  base: './', // CRITICO: Genera rutas relativas (./assets/...) necesarias para extensiones
+  plugins: [react(), copyAssets()],
+  base: './',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
       input: {
         popup: resolve(__dirname, 'index.html'),
+        privacy: resolve(__dirname, 'privacy.html'),
       },
     },
   },
