@@ -1,0 +1,5 @@
+{
+  "name": "bookmark-speed",
+  "description": "Lightning-fast command palette to search and launch browser bookmarks instantly via keyboard shortcuts.",
+  "requestFramePermissions": []
+}
