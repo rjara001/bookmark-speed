@@ -2,23 +2,25 @@
 {
   "manifest_version": 3,
   "name": "bookmark-speed",
-  "version": "1.0.0",
-  "description": "Access your bookmarks instantly with a keyboard-driven command palette. Search by title, URL, or folder and launch with a single keystroke.",
+  "version": "1.0.2",
+  "description": "Lightning-fast bookmark search via keyboard.",
   "permissions": [
     "bookmarks",
     "tabs"
   ],
   "action": {
     "default_popup": "index.html",
-    "default_title": "Open bookmark-speed"
+    "default_title": "Abrir buscador de marcadores"
   },
   "commands": {
     "_execute_action": {
       "suggested_key": {
         "default": "Alt+B",
         "mac": "Command+Shift+K"
-      },
-      "description": "Open bookmark-speed"
+      }
     }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'unsafe-eval' https://esm.sh https://cdn.tailwindcss.com; object-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com"
   }
 }
