@@ -2,13 +2,14 @@
 {
   "name": "jetmark-extension",
   "private": true,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "publish": "npm run build && node zip-build.js"
+    "bump-version": "npm version patch --no-git-tag-version && node scripts/sync-manifest-version.js",
+    "publish": "npm run bump-version && npm run build && node zip-build.js"
   },
   "dependencies": {
     "react": "^19.0.0",
