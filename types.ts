@@ -1,8 +1,6 @@
 
 // Declaración global para evitar errores de 'chrome is not defined' en TS
-declare global {
-  const chrome: any;
-}
+declare var chrome: any;
 
 export interface Bookmark {
   id: string;
