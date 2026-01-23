@@ -9,6 +9,7 @@ const App: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [version, setVersion] = useState('1.0.0');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Detectar plataforma para mostrar el símbolo correcto
@@ -21,6 +22,11 @@ const App: React.FC = () => {
       setLoading(false);
     };
     loadBookmarks();
+    
+    // Obtener versión real del manifiesto
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) {
+      setVersion(chrome.runtime.getManifest().version);
+    }
     
     // Auto-enfocar el buscador al abrir
     setTimeout(() => {
@@ -131,7 +137,7 @@ const App: React.FC = () => {
             <kbd className="px-1 py-0.5 bg-white border border-gray-200 rounded">↵</kbd> Open
           </div>
         </div>
-        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">JetMark v1.0.1</span>
+        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">JetMark v{version}</span>
       </div>
     </div>
   );

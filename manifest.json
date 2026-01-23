@@ -2,7 +2,7 @@
 {
   "manifest_version": 3,
   "name": "JetMark",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Lightning-fast command palette to search and launch browser bookmarks instantly via keyboard shortcuts.",
   "permissions": [
     "bookmarks"
@@ -21,6 +21,9 @@
     }
   },
   "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   }
 }
