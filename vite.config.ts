@@ -1,36 +1,33 @@
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-// Plugin para copiar archivos necesarios a la carpeta dist
-const copyAssets = () => {
-  return {
-    name: 'copy-assets',
-    closeBundle() {
-      const filesToCopy = ['manifest.json'];
-      const distPath = resolve(__dirname, 'dist');
-      
-      if (!fs.existsSync(distPath)) {
-        fs.mkdirSync(distPath);
-      }
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-      filesToCopy.forEach(file => {
-        const source = resolve(__dirname, file);
+const chromeExtensionHelper = () => {
+  return {
+    name: 'chrome-extension-helper',
+    closeBundle() {
+      const distPath = resolve(__dirname, 'dist');
+      if (!fs.existsSync(distPath)) fs.mkdirSync(distPath, { recursive: true });
+
+      // Copiar archivos estáticos de extensión
+      ['manifest.json', 'content.js', 'content.css'].forEach(file => {
+        const src = resolve(__dirname, file);
         const dest = resolve(distPath, file);
-        if (fs.existsSync(source)) {
-          fs.copyFileSync(source, dest);
-        }
+        if (fs.existsSync(src)) fs.copyFileSync(src, dest);
       });
       
-      console.log('\x1b[32m%s\x1b[0m', '✓ Archivos de extensión copiados a dist/');
+      console.log('✓ Archivos de extensión copiados a dist/');
     }
   };
 };
 
 export default defineConfig({
-  plugins: [react(), copyAssets()],
+  plugins: [react(), chromeExtensionHelper()],
   base: './',
   build: {
     outDir: 'dist',
@@ -38,7 +35,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: resolve(__dirname, 'index.html'),
-        privacy: resolve(__dirname, 'privacy.html'),
       },
     },
   },

@@ -1,32 +1,28 @@
+
 {
   "manifest_version": 3,
   "name": "JetMark",
-  "version": "1.0.3",
-  "description": "Acceso ultra rápido a tus marcadores con el teclado mediante comandos.",
+  "version": "1.0.1",
+  "description": "Lightning-fast command palette to search and launch browser bookmarks instantly via keyboard shortcuts.",
   "permissions": [
     "bookmarks",
-    "tabs"
+    "tabs",
+    "storage"
   ],
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  },
   "action": {
     "default_popup": "index.html",
-    "default_title": "Abrir JetMark",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
+    "default_title": "Abrir JetMark"
   },
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Alt+B",
-        "mac": "Command+Shift+K"
-      }
+        "default": "Alt+Shift+J",
+        "mac": "Command+Shift+J"
+      },
+      "description": "Abrir el buscador de JetMark"
     }
+  },
+  "icons": {
+    "128": "icons/icon128.png"
   }
 }
