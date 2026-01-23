@@ -1,9 +1,6 @@
 
 import { Bookmark } from '../types';
 
-// Declare chrome global for TypeScript
-declare const chrome: any;
-
 /**
  * Recursively flattens the bookmark tree provided by Chrome.
  */
@@ -17,11 +14,13 @@ const flattenBookmarks = (nodes: any[], path: string[] = []): Bookmark[] => {
         url: node.url,
         parentId: node.parentId,
         dateAdded: node.dateAdded,
-        folderPath: path
+        folderPath: path.filter(p => p && p !== 'root' && p !== 'Roots')
       });
     }
     if (node.children) {
-      results = results.concat(flattenBookmarks(node.children, [...path, node.title]));
+      // Evitamos añadir nombres vacíos o genéricos a la ruta
+      const nextPath = node.title ? [...path, node.title] : path;
+      results = results.concat(flattenBookmarks(node.children, nextPath));
     }
   }
   return results;
@@ -42,7 +41,6 @@ const MOCK_BOOKMARKS: Bookmark[] = [
 ];
 
 export const getBookmarks = async (): Promise<Bookmark[]> => {
-  // Check if we are in a Chrome extension environment
   if (typeof chrome !== 'undefined' && chrome.bookmarks) {
     return new Promise((resolve) => {
       chrome.bookmarks.getTree((tree: any[]) => {
@@ -51,7 +49,6 @@ export const getBookmarks = async (): Promise<Bookmark[]> => {
     });
   }
   
-  // Return mock data for development preview
   return new Promise((resolve) => {
     setTimeout(() => resolve(MOCK_BOOKMARKS), 300);
   });
@@ -64,9 +61,8 @@ export const openBookmark = (url: string, newTab: boolean = true) => {
     } else {
       chrome.tabs.update({ url });
     }
-    window.close(); // Close the popup/extension UI
+    window.close();
   } else {
-    // Development preview behavior
     window.open(url, '_blank');
   }
 };

@@ -1,3 +1,9 @@
+
+// Declaración global para evitar errores de 'chrome is not defined' en TS
+declare global {
+  const chrome: any;
+}
+
 export interface Bookmark {
   id: string;
   title: string;
@@ -7,6 +13,7 @@ export interface Bookmark {
   folderPath?: string[];
 }
 
+// Fix: Added CapturedValue interface required by storageService.ts
 export interface CapturedValue {
   id: string;
   value: string;
@@ -14,6 +21,7 @@ export interface CapturedValue {
   sourceUrl: string;
 }
 
+// Fix: Added StorageData interface required by storageService.ts
 export interface StorageData {
   capturedValues: CapturedValue[];
   config: {

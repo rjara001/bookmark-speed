@@ -1,3 +1,4 @@
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve, dirname } from 'path';
@@ -14,14 +15,14 @@ const chromeExtensionHelper = () => {
       const distPath = resolve(__dirname, 'dist');
       if (!fs.existsSync(distPath)) fs.mkdirSync(distPath, { recursive: true });
 
-      // Copiar archivos estáticos de extensión
-      ['manifest.json', 'content.js', 'content.css'].forEach(file => {
+      // Solo copiamos el manifest, los assets se encargará Vite
+      ['manifest.json'].forEach(file => {
         const src = resolve(__dirname, file);
         const dest = resolve(distPath, file);
         if (fs.existsSync(src)) fs.copyFileSync(src, dest);
       });
       
-      console.log('✓ Archivos de extensión copiados a dist/');
+      console.log('✓ Manifest copiado a dist/');
     }
   };
 };

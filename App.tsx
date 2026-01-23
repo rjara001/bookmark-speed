@@ -80,4 +80,61 @@ const App: React.FC = () => {
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-end">
              <div className="flex gap-1">
-                <kbd className="px-1.5 py-0.5 text-[9px] font-bold text-gray-500 bg-gray-100 border border
+                <kbd className="px-1.5 py-0.5 text-[9px] font-bold text-gray-500 bg-gray-100 border border-gray-200 rounded shadow-sm">
+                  {isMac ? '⌥' : 'Alt'}
+                </kbd>
+                <kbd className="px-1.5 py-0.5 text-[9px] font-bold text-gray-500 bg-gray-100 border border-gray-200 rounded shadow-sm">
+                  {isMac ? '⇧' : 'Shift'}
+                </kbd>
+                <kbd className="px-1.5 py-0.5 text-[9px] font-bold text-gray-500 bg-gray-100 border border-gray-200 rounded shadow-sm">
+                  J
+                </kbd>
+             </div>
+             <span className="text-[8px] font-black text-blue-500 uppercase tracking-tighter mt-1 opacity-60">Global Shortcut</span>
+          </div>
+          <div className="w-px h-6 bg-gray-100 mx-1"></div>
+          <kbd className="px-1.5 py-1 text-[10px] font-bold text-gray-400 bg-gray-50 border border-gray-200 rounded">ESC</kbd>
+        </div>
+      </div>
+
+      {/* Results List */}
+      <div className="flex-grow overflow-y-auto no-scrollbar">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-400">
+             <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+             <span className="text-xs font-bold uppercase tracking-widest">Indexing...</span>
+          </div>
+        ) : filteredBookmarks.length > 0 ? (
+          filteredBookmarks.map((bookmark, index) => (
+            <BookmarkItem
+              key={bookmark.id}
+              bookmark={bookmark}
+              isSelected={index === selectedIndex}
+              onSelect={openBookmark}
+              onMouseEnter={() => setSelectedIndex(index)}
+            />
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 px-10 text-center">
+            <p className="text-sm font-medium">No bookmarks matching "{search}"</p>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="p-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center px-5">
+        <div className="flex gap-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500">
+            <kbd className="px-1 py-0.5 bg-white border border-gray-200 rounded">↓↑</kbd> Navigate
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500">
+            <kbd className="px-1 py-0.5 bg-white border border-gray-200 rounded">↵</kbd> Open
+          </div>
+        </div>
+        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">JetMark v1.0.1</span>
+      </div>
+    </div>
+  );
+};
+
+export default App;
