@@ -1,6 +1,8 @@
 
 // Declaración global para evitar errores de 'chrome is not defined' en TS
-declare var chrome: any;
+declare global {
+  const chrome: any;
+}
 
 export interface Bookmark {
   id: string;
@@ -12,7 +14,7 @@ export interface Bookmark {
 }
 
 /**
- * Fix: Added missing CapturedValue interface used for data persistence
+ * Interface representing a value captured from an input field
  */
 export interface CapturedValue {
   id: string;
@@ -22,12 +24,17 @@ export interface CapturedValue {
 }
 
 /**
- * Fix: Added missing StorageData interface representing the local storage schema
+ * Configuration settings for the storage service
+ */
+export interface StorageConfig {
+  excludeSecrets: boolean;
+  autoAutocomplete: boolean;
+}
+
+/**
+ * Root structure for storage data
  */
 export interface StorageData {
   capturedValues: CapturedValue[];
-  config: {
-    excludeSecrets: boolean;
-    autoAutocomplete: boolean;
-  };
+  config: StorageConfig;
 }
