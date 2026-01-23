@@ -48,28 +48,16 @@ export const getBookmarks = async (): Promise<Bookmark[]> => {
 };
 
 /**
- * Abre un marcador. 
- * Si ya está abierto en una pestaña, cambia a esa pestaña (Justifica el permiso 'tabs').
+ * Abre un marcador de forma sencilla.
+ * chrome.tabs.create y update (para la pestaña actual) NO requieren el permiso "tabs".
  */
 export const openBookmark = async (url: string, newTab: boolean = true) => {
   if (typeof chrome !== 'undefined' && chrome.tabs) {
-    // Buscar si ya existe una pestaña con esta URL
-    const tabs = await chrome.tabs.query({});
-    const existingTab = tabs.find((t: any) => t.url === url);
-
-    if (existingTab && existingTab.id) {
-      // Si existe, hacemos foco en ella
-      await chrome.tabs.update(existingTab.id, { active: true });
-      if (existingTab.windowId) {
-        await chrome.windows.update(existingTab.windowId, { focused: true });
-      }
+    if (newTab) {
+      chrome.tabs.create({ url });
     } else {
-      // Si no existe, abrimos nueva o actualizamos la actual
-      if (newTab) {
-        await chrome.tabs.create({ url });
-      } else {
-        await chrome.tabs.update({ url });
-      }
+      // Actualiza la pestaña donde el usuario hizo clic en la extensión
+      chrome.tabs.update({ url });
     }
     window.close();
   } else {
