@@ -1,14 +1,23 @@
-
 export interface Bookmark {
   id: string;
   title: string;
-  url?: string;
+  url: string;
   parentId?: string;
   dateAdded?: number;
   folderPath?: string[];
 }
 
-export enum ViewMode {
-  LIST = 'LIST',
-  GRID = 'GRID'
+export interface CapturedValue {
+  id: string;
+  value: string;
+  timestamp: number;
+  sourceUrl: string;
+}
+
+export interface StorageData {
+  capturedValues: CapturedValue[];
+  config: {
+    excludeSecrets: boolean;
+    autoAutocomplete: boolean;
+  };
 }

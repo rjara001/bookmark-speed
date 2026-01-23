@@ -1,30 +1,34 @@
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-// Plugin para copiar el manifest.json a la carpeta dist
-const copyManifest = () => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const chromeExtensionHelper = () => {
   return {
-    name: 'copy-manifest',
+    name: 'chrome-extension-helper',
     closeBundle() {
-      const manifestPath = resolve(__dirname, 'manifest.json');
-      const distPath = resolve(__dirname, 'dist/manifest.json');
-      if (fs.existsSync(manifestPath)) {
-        if (!fs.existsSync(resolve(__dirname, 'dist'))) {
-          fs.mkdirSync(resolve(__dirname, 'dist'));
-        }
-        fs.copyFileSync(manifestPath, distPath);
-        console.log('\x1b[32m%s\x1b[0m', '✓ manifest.json copiado a dist/');
-      }
+      const distPath = resolve(__dirname, 'dist');
+      if (!fs.existsSync(distPath)) fs.mkdirSync(distPath, { recursive: true });
+
+      // Copiar archivos estáticos de extensión
+      ['manifest.json', 'content.js', 'content.css'].forEach(file => {
+        const src = resolve(__dirname, file);
+        const dest = resolve(distPath, file);
+        if (fs.existsSync(src)) fs.copyFileSync(src, dest);
+      });
+      
+      console.log('✓ Archivos de extensión copiados a dist/');
     }
   };
 };
 
 export default defineConfig({
-  plugins: [react(), copyManifest()],
-  base: './', // CRITICO: Genera rutas relativas (./assets/...) necesarias para extensiones
+  plugins: [react(), chromeExtensionHelper()],
+  base: './',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
