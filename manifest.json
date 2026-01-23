@@ -5,8 +5,7 @@
   "version": "1.0.3",
   "description": "Lightning-fast command palette to search and launch browser bookmarks instantly via keyboard shortcuts.",
   "permissions": [
-    "bookmarks",
-    "tabs"
+    "bookmarks"
   ],
   "action": {
     "default_popup": "index.html",
