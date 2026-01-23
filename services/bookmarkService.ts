@@ -18,7 +18,6 @@ const flattenBookmarks = (nodes: any[], path: string[] = []): Bookmark[] => {
       });
     }
     if (node.children) {
-      // Evitamos añadir nombres vacíos o genéricos a la ruta
       const nextPath = node.title ? [...path, node.title] : path;
       results = results.concat(flattenBookmarks(node.children, nextPath));
     }
@@ -27,17 +26,14 @@ const flattenBookmarks = (nodes: any[], path: string[] = []): Bookmark[] => {
 };
 
 /**
- * Mock data for when running outside of a Chrome Extension environment.
+ * Mock data for development
  */
 const MOCK_BOOKMARKS: Bookmark[] = [
   { id: '1', title: 'GitHub', url: 'https://github.com', folderPath: ['Work', 'Dev'] },
   { id: '2', title: 'Stack Overflow', url: 'https://stackoverflow.com', folderPath: ['Work', 'Dev'] },
   { id: '3', title: 'Gmail', url: 'https://mail.google.com', folderPath: ['Personal'] },
-  { id: '4', title: 'YouTube', url: 'https://youtube.com', folderPath: ['Entertainment'] },
   { id: '5', title: 'Gemini AI', url: 'https://gemini.google.com', folderPath: ['AI'] },
-  { id: '6', title: 'Tailwind CSS', url: 'https://tailwindcss.com', folderPath: ['Docs'] },
-  { id: '7', title: 'React Documentation', url: 'https://react.dev', folderPath: ['Docs', 'Frontend'] },
-  { id: '8', title: 'Netflix', url: 'https://netflix.com', folderPath: ['Entertainment'] },
+  { id: '7', title: 'React Docs', url: 'https://react.dev', folderPath: ['Docs', 'Frontend'] },
 ];
 
 export const getBookmarks = async (): Promise<Bookmark[]> => {
@@ -48,18 +44,32 @@ export const getBookmarks = async (): Promise<Bookmark[]> => {
       });
     });
   }
-  
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(MOCK_BOOKMARKS), 300);
-  });
+  return new Promise((resolve) => setTimeout(() => resolve(MOCK_BOOKMARKS), 300));
 };
 
-export const openBookmark = (url: string, newTab: boolean = true) => {
+/**
+ * Abre un marcador. 
+ * Si ya está abierto en una pestaña, cambia a esa pestaña (Justifica el permiso 'tabs').
+ */
+export const openBookmark = async (url: string, newTab: boolean = true) => {
   if (typeof chrome !== 'undefined' && chrome.tabs) {
-    if (newTab) {
-      chrome.tabs.create({ url });
+    // Buscar si ya existe una pestaña con esta URL
+    const tabs = await chrome.tabs.query({});
+    const existingTab = tabs.find((t: any) => t.url === url);
+
+    if (existingTab && existingTab.id) {
+      // Si existe, hacemos foco en ella
+      await chrome.tabs.update(existingTab.id, { active: true });
+      if (existingTab.windowId) {
+        await chrome.windows.update(existingTab.windowId, { focused: true });
+      }
     } else {
-      chrome.tabs.update({ url });
+      // Si no existe, abrimos nueva o actualizamos la actual
+      if (newTab) {
+        await chrome.tabs.create({ url });
+      } else {
+        await chrome.tabs.update({ url });
+      }
     }
     window.close();
   } else {

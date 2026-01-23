@@ -11,7 +11,9 @@ export interface Bookmark {
   folderPath?: string[];
 }
 
-// Fix: Added CapturedValue interface required by storageService.ts
+/**
+ * Fix: Added missing CapturedValue interface used for data persistence
+ */
 export interface CapturedValue {
   id: string;
   value: string;
@@ -19,7 +21,9 @@ export interface CapturedValue {
   sourceUrl: string;
 }
 
-// Fix: Added StorageData interface required by storageService.ts
+/**
+ * Fix: Added missing StorageData interface representing the local storage schema
+ */
 export interface StorageData {
   capturedValues: CapturedValue[];
   config: {
