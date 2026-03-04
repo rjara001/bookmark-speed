@@ -63,14 +63,34 @@ const App: React.FC = () => {
   };
 
   const filteredBookmarks = useMemo(() => {
-    const term = search.toLowerCase();
+    const term = search.toLowerCase().trim();
     if (!term) return bookmarks.slice(0, 50);
     
-    return bookmarks.filter(b => 
-      b.title.toLowerCase().includes(term) || 
-      b.url.toLowerCase().includes(term) ||
-      (b.shortcut && b.shortcut.toLowerCase().includes(term))
-    ).slice(0, 50);
+    return bookmarks
+      .map(b => {
+        let score = 0;
+        const title = b.title.toLowerCase();
+        const url = b.url.toLowerCase();
+        const shortcut = (b.shortcut || '').toLowerCase();
+
+        if (shortcut === term) score += 1000;
+        else if (shortcut.startsWith(term)) score += 800;
+        else if (shortcut.includes(term)) score += 600;
+
+        if (title.startsWith(term)) score += 400;
+        else if (title.includes(term)) score += 200;
+
+        if (url.includes(term)) score += 100;
+
+        // Add usage count as a tie-breaker (normalized)
+        score += Math.min((b.usageCount || 0) / 10, 50);
+
+        return { bookmark: b, score };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.bookmark)
+      .slice(0, 50);
   }, [bookmarks, search]);
 
   useEffect(() => {
