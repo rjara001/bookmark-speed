@@ -1,9 +1,4 @@
 
-// Declaración global para evitar errores de 'chrome is not defined' en TS
-declare global {
-  const chrome: any;
-}
-
 export interface Bookmark {
   id: string;
   title: string;
@@ -11,6 +6,8 @@ export interface Bookmark {
   parentId?: string;
   dateAdded?: number;
   folderPath?: string[];
+  usageCount?: number;
+  shortcut?: string;
 }
 
 /**
@@ -37,4 +34,6 @@ export interface StorageConfig {
 export interface StorageData {
   capturedValues: CapturedValue[];
   config: StorageConfig;
+  bookmarkStats: Record<string, number>;
+  bookmarkShortcuts: Record<string, string>;
 }

@@ -1,5 +1,6 @@
 
 import { Bookmark } from '../types';
+import { getStorageData, incrementBookmarkUsage } from './storageService';
 
 /**
  * Recursively flattens the bookmark tree provided by Chrome.
@@ -37,21 +38,43 @@ const MOCK_BOOKMARKS: Bookmark[] = [
 ];
 
 export const getBookmarks = async (): Promise<Bookmark[]> => {
+  const storage = await getStorageData();
+  const stats = storage.bookmarkStats || {};
+  const shortcuts = storage.bookmarkShortcuts || {};
+
+  let bookmarks: Bookmark[] = [];
+
   if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-    return new Promise((resolve) => {
+    bookmarks = await new Promise((resolve) => {
       chrome.bookmarks.getTree((tree: any[]) => {
         resolve(flattenBookmarks(tree));
       });
     });
+  } else {
+    bookmarks = [...MOCK_BOOKMARKS];
   }
-  return new Promise((resolve) => setTimeout(() => resolve(MOCK_BOOKMARKS), 300));
+
+  // Merge stats, shortcuts and sort
+  return bookmarks.map(b => {
+    // Generate a default shortcut if not exists (first 3 chars of title)
+    const defaultShortcut = b.title.toLowerCase().replace(/\s+/g, '').substring(0, 3);
+    return {
+      ...b,
+      usageCount: stats[b.id] || 0,
+      shortcut: shortcuts[b.id] || defaultShortcut
+    };
+  }).sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
 };
 
 /**
  * Abre un marcador de forma sencilla.
  * chrome.tabs.create y update (para la pestaña actual) NO requieren el permiso "tabs".
  */
-export const openBookmark = async (url: string, newTab: boolean = true) => {
+export const openBookmark = async (url: string, id?: string, newTab: boolean = true) => {
+  if (id) {
+    await incrementBookmarkUsage(id);
+  }
+
   if (typeof chrome !== 'undefined' && chrome.tabs) {
     if (newTab) {
       chrome.tabs.create({ url });

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Bookmark } from './types';
 import { getBookmarks, openBookmark } from './services/bookmarkService';
+import { saveBookmarkShortcut } from './services/storageService';
 import BookmarkItem from './components/BookmarkItem';
 
 const App: React.FC = () => {
@@ -10,22 +11,35 @@ const App: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [version, setVersion] = useState('1.0.0');
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Detectar plataforma para mostrar el símbolo correcto
   const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 
+  const [currentShortcut, setCurrentShortcut] = useState(isMac ? '⌘ ⇧ J' : 'Alt Shift J');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const loadBookmarks = async () => {
+    const data = await getBookmarks();
+    setBookmarks(data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const loadBookmarks = async () => {
-      const data = await getBookmarks();
-      setBookmarks(data);
-      setLoading(false);
-    };
     loadBookmarks();
     
     // Obtener versión real del manifiesto
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) {
       setVersion(chrome.runtime.getManifest().version);
+    }
+
+    // Obtener el atajo actual configurado en Chrome
+    if (typeof chrome !== 'undefined' && chrome.commands) {
+      chrome.commands.getAll((commands: any[]) => {
+        const actionCommand = commands.find(c => c.name === '_execute_action');
+        if (actionCommand && actionCommand.shortcut) {
+          setCurrentShortcut(actionCommand.shortcut);
+        }
+      });
     }
     
     // Auto-enfocar el buscador al abrir
@@ -34,13 +48,28 @@ const App: React.FC = () => {
     }, 100);
   }, []);
 
+  const openShortcutsPage = () => {
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+    } else {
+      alert('To change the shortcut, go to chrome://extensions/shortcuts');
+    }
+  };
+
+  const handleShortcutEdit = async (id: string, newShortcut: string) => {
+    await saveBookmarkShortcut(id, newShortcut);
+    // Refresh the list to show the new shortcut
+    loadBookmarks();
+  };
+
   const filteredBookmarks = useMemo(() => {
     const term = search.toLowerCase();
     if (!term) return bookmarks.slice(0, 50);
     
     return bookmarks.filter(b => 
       b.title.toLowerCase().includes(term) || 
-      b.url.toLowerCase().includes(term)
+      b.url.toLowerCase().includes(term) ||
+      (b.shortcut && b.shortcut.toLowerCase().includes(term))
     ).slice(0, 50);
   }, [bookmarks, search]);
 
@@ -58,7 +87,7 @@ const App: React.FC = () => {
     } else if (e.key === 'Enter') {
       const selected = filteredBookmarks[selectedIndex];
       if (selected) {
-        openBookmark(selected.url);
+        openBookmark(selected.url, selected.id);
       }
     }
   };
@@ -84,19 +113,21 @@ const App: React.FC = () => {
         
         {/* Shortcut Badges */}
         <div className="flex items-center gap-2">
-          <div className="flex flex-col items-end">
+          <div 
+            className="flex flex-col items-end cursor-pointer group/shortcut"
+            onClick={openShortcutsPage}
+            title="Click to change global shortcut"
+          >
              <div className="flex gap-1">
-                <kbd className="px-1.5 py-0.5 text-[9px] font-bold text-gray-500 bg-gray-100 border border-gray-200 rounded shadow-sm">
-                  {isMac ? '⌥' : 'Alt'}
-                </kbd>
-                <kbd className="px-1.5 py-0.5 text-[9px] font-bold text-gray-500 bg-gray-100 border border-gray-200 rounded shadow-sm">
-                  {isMac ? '⇧' : 'Shift'}
-                </kbd>
-                <kbd className="px-1.5 py-0.5 text-[9px] font-bold text-gray-500 bg-gray-100 border border-gray-200 rounded shadow-sm">
-                  J
-                </kbd>
+                {currentShortcut.split('+').map((key, idx) => (
+                  <kbd key={idx} className="px-1.5 py-0.5 text-[9px] font-bold text-gray-500 bg-gray-100 border border-gray-200 rounded shadow-sm group-hover/shortcut:bg-blue-50 group-hover/shortcut:border-blue-200 group-hover/shortcut:text-blue-600 transition-colors">
+                    {key.trim()}
+                  </kbd>
+                ))}
              </div>
-             <span className="text-[8px] font-black text-blue-500 uppercase tracking-tighter mt-1 opacity-60">Global Shortcut</span>
+             <span className="text-[8px] font-black text-blue-500 uppercase tracking-tighter mt-1 opacity-60 group-hover/shortcut:opacity-100 transition-opacity">
+               Change Shortcut
+             </span>
           </div>
           <div className="w-px h-6 bg-gray-100 mx-1"></div>
           <kbd className="px-1.5 py-1 text-[10px] font-bold text-gray-400 bg-gray-50 border border-gray-200 rounded">ESC</kbd>
@@ -118,6 +149,7 @@ const App: React.FC = () => {
               isSelected={index === selectedIndex}
               onSelect={openBookmark}
               onMouseEnter={() => setSelectedIndex(index)}
+              onShortcutEdit={handleShortcutEdit}
             />
           ))
         ) : (
@@ -135,6 +167,9 @@ const App: React.FC = () => {
           </div>
           <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500">
             <kbd className="px-1 py-0.5 bg-white border border-gray-200 rounded">↵</kbd> Open
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-blue-500/60">
+            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Search by Shortcut
           </div>
         </div>
         <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">JetMark v{version}</span>

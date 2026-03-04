@@ -1,22 +1,24 @@
 import { CapturedValue, StorageData } from '../types';
 
-declare const chrome: any;
-
 const DEFAULT_DATA: StorageData = {
   capturedValues: [],
   config: {
     excludeSecrets: true,
     autoAutocomplete: true
-  }
+  },
+  bookmarkStats: {},
+  bookmarkShortcuts: {}
 };
 
 export const getStorageData = async (): Promise<StorageData> => {
   if (typeof chrome !== 'undefined' && chrome.storage) {
     return new Promise((resolve) => {
-      chrome.storage.local.get(['capturedValues', 'config'], (result: any) => {
+      chrome.storage.local.get(['capturedValues', 'config', 'bookmarkStats', 'bookmarkShortcuts'], (result: any) => {
         resolve({
           capturedValues: result.capturedValues || [],
-          config: result.config || DEFAULT_DATA.config
+          config: result.config || DEFAULT_DATA.config,
+          bookmarkStats: result.bookmarkStats || {},
+          bookmarkShortcuts: result.bookmarkShortcuts || {}
         });
       });
     });
@@ -65,8 +67,32 @@ export const removeValue = async (id: string) => {
 
 export const clearAll = async () => {
   if (typeof chrome !== 'undefined' && chrome.storage) {
-    await chrome.storage.local.set({ capturedValues: [] });
+    await chrome.storage.local.set({ capturedValues: [], bookmarkStats: {}, bookmarkShortcuts: {} });
   } else {
     localStorage.removeItem('jetstorage_mock');
+  }
+};
+
+export const incrementBookmarkUsage = async (id: string) => {
+  const data = await getStorageData();
+  const stats = { ...data.bookmarkStats };
+  stats[id] = (stats[id] || 0) + 1;
+
+  if (typeof chrome !== 'undefined' && chrome.storage) {
+    await chrome.storage.local.set({ bookmarkStats: stats });
+  } else {
+    localStorage.setItem('jetstorage_mock', JSON.stringify({ ...data, bookmarkStats: stats }));
+  }
+};
+
+export const saveBookmarkShortcut = async (id: string, shortcut: string) => {
+  const data = await getStorageData();
+  const shortcuts = { ...data.bookmarkShortcuts };
+  shortcuts[id] = shortcut;
+
+  if (typeof chrome !== 'undefined' && chrome.storage) {
+    await chrome.storage.local.set({ bookmarkShortcuts: shortcuts });
+  } else {
+    localStorage.setItem('jetstorage_mock', JSON.stringify({ ...data, bookmarkShortcuts: shortcuts }));
   }
 };
