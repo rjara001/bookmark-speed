@@ -73,17 +73,18 @@ const App: React.FC = () => {
         const url = b.url.toLowerCase();
         const shortcut = (b.shortcut || '').toLowerCase();
 
-        if (shortcut === term) score += 1000;
-        else if (shortcut.startsWith(term)) score += 800;
-        else if (shortcut.includes(term)) score += 600;
+        // Base scores for different match types
+        if (shortcut === term) score += 10000;
+        else if (shortcut.startsWith(term)) score += 8000;
+        else if (shortcut.includes(term)) score += 6000;
+        else if (title.startsWith(term)) score += 4000;
+        else if (title.includes(term)) score += 2000;
+        else if (url.includes(term)) score += 1000;
 
-        if (title.startsWith(term)) score += 400;
-        else if (title.includes(term)) score += 200;
-
-        if (url.includes(term)) score += 100;
-
-        // Add usage count as a tie-breaker (normalized)
-        score += Math.min((b.usageCount || 0) / 10, 50);
+        // Add usage count as a strong secondary factor within each category
+        // This ensures that within the same match category (e.g. both start with title),
+        // the most used one wins.
+        score += Math.min((b.usageCount || 0) * 10, 900);
 
         return { bookmark: b, score };
       })
