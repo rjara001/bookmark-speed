@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "set-version": "node scripts/set-version.js",
-    "publish": "npm run set-version -- && npm run build && node zip-build.js"
+    "publish": "node scripts/publish.js"
   },
   "dependencies": {
     "react": "^19.0.0",
