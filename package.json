@@ -9,8 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
-    "bump-version": "npm version patch --no-git-tag-version && node scripts/sync-manifest-version.js",
-    "publish": "npm run bump-version && npm run build && node zip-build.js"
+    "set-version": "node scripts/set-version.js",
+    "publish": "npm run set-version -- && npm run build && node zip-build.js"
   },
   "dependencies": {
     "react": "^19.0.0",
